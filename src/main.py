@@ -1,6 +1,11 @@
 import common
 
 
+def exit_program():
+    print("\nExiting Sky Cycle. Goodbye! 👋")
+    exit()
+
+
 def main():
     # Load json file
     data = common.load()
@@ -18,13 +23,16 @@ def main():
         0: "Exit",
     }
 
-    print("""
-        ╔════════════════════════════════════════════════╗
-        ║                 🌅 Sky Cycle                   ║
-        ╚════════════════════════════════════════════════╝""")
+    # Define pages you can switch too
+    ROUTES = {
+        # 1: setup_location(),
+        # 2: add_profile(),
+        # 3: remove_profile(),
+        0: exit_program,
+    }
 
     print(
-        "     Location: set ✔" if data.get("location") else "     Location: Not set ⚠️"
+        f"{margin * ' '}╔════════════════════════════════════════════════╗\n{margin * ' '}║                 🌅 Sky Cycle                   ║\n{margin * ' '}╚════════════════════════════════════════════════╝"
     )
     print(f"     Active Profile: {data.get('active_profile', 'None')}")
 
@@ -54,6 +62,8 @@ def main():
                 print("Invalid option")
         except ValueError:
             print("Invalid input.")
+
+    ROUTES[choice]()
 
 
 if __name__ == "__main__":
