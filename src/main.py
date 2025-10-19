@@ -1,4 +1,5 @@
 import common
+from routes import setup_location
 
 
 def exit_program():
@@ -6,35 +7,13 @@ def exit_program():
     exit()
 
 
-def main():
-    # Load json file
-    data = common.load()
-
+def menu():
     # ui options
     margin = 5
-
-    MENU_OPTIONS = {
-        1: "Setup Location",
-        2: "Add Profile",
-        3: "Remove Profile",
-        4: "Activate Profile",
-        5: "Deactivate",
-        6: "Settings",
-        0: "Exit",
-    }
-
-    # Define pages you can switch too
-    ROUTES = {
-        # 1: setup_location(),
-        # 2: add_profile(),
-        # 3: remove_profile(),
-        0: exit_program,
-    }
 
     print(
         f"{margin * ' '}╔════════════════════════════════════════════════╗\n{margin * ' '}║                 🌅 Sky Cycle                   ║\n{margin * ' '}╚════════════════════════════════════════════════╝"
     )
-    print(f"     Active Profile: {data.get('active_profile', 'None')}")
 
     print(
         f"{margin * ' '}Location: set ✔"
@@ -49,6 +28,16 @@ def main():
         print(f"{margin * ' '}│  {idx}. {option:<41}  │")
 
     print(f"{margin * ' '}└────────────────────────────────────────────────┘")
+
+
+def main():
+    # Define pages you can switch too
+    ROUTES = {
+        1: setup_location.setup_location,
+        # 2: add_profile,
+        # 3: remove_profile,
+        0: exit_program,
+    }
 
     valid_option = False
 
@@ -67,4 +56,19 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    # Load json file
+    data = common.load()
+
+    MENU_OPTIONS = {
+        1: "Setup Location",
+        2: "Add Profile",
+        3: "Remove Profile",
+        4: "Activate Profile",
+        5: "Deactivate",
+        6: "Settings",
+        0: "Exit",
+    }
+
+    menu()
+    while True:  # app run infinitly
+        main()

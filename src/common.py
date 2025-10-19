@@ -22,6 +22,6 @@ def load() -> dict[str, None]:
     return data
 
 
-def write(data):
+def write(data: dict[str, None]):
     with open(data_file, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=4)
