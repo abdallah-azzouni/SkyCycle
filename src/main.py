@@ -5,6 +5,9 @@ def main():
     # Load json file
     data = common.load()
 
+    # ui options
+    margin = 5
+
     MENU_OPTIONS = {
         1: "Setup Location",
         2: "Add Profile",
@@ -25,12 +28,19 @@ def main():
     )
     print(f"     Active Profile: {data.get('active_profile', 'None')}")
 
-    print("     ┌─ Main Menu ────────────────────────────────────┐")
+    print(
+        f"{margin * ' '}Location: set ✔"
+        if data.get("location")
+        else f"{margin * ' '}Location: Not set ⚠️"
+    )
+    print(f"{margin * ' '}Active Profile: {data.get('active_profile', 'None')}")
+
+    print(f"{margin * ' '}┌─ Main Menu ────────────────────────────────────┐")
 
     for idx, option in MENU_OPTIONS.items():
-        print(f"     │  {idx}. {option:<41}  │")
+        print(f"{margin * ' '}│  {idx}. {option:<41}  │")
 
-    print("     └────────────────────────────────────────────────┘")
+    print(f"{margin * ' '}└────────────────────────────────────────────────┘")
 
     valid_option = False
 
