@@ -4,6 +4,9 @@ import os
 data_file = "data.json"
 template = {"location": None, "active_profile": None}
 
+# ui options
+margin = 5
+
 
 def load() -> dict[str, None]:
     if not os.path.exists(data_file) or os.stat(data_file).st_size == 0:
@@ -22,6 +25,6 @@ def load() -> dict[str, None]:
     return data
 
 
-def write(data: dict[str, None]):
+def write(data: dict[any]):
     with open(data_file, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=4)
