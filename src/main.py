@@ -1,4 +1,5 @@
 import common
+import os
 from routes import setup_location
 
 
@@ -37,26 +38,23 @@ def main():
         0: exit_program,
     }
 
-    # ui options
-    margin = 5
-
     print(
-        f"{margin * ' '}╔════════════════════════════════════════════════╗\n{margin * ' '}║                 🌅 Sky Cycle                   ║\n{margin * ' '}╚════════════════════════════════════════════════╝"
+        f"{common.margin * ' '}╔════════════════════════════════════════════════╗\n{common.margin * ' '}║                 🌅 Sky Cycle                   ║\n{common.margin * ' '}╚════════════════════════════════════════════════╝"
     )
 
     print(
-        f"{margin * ' '}Location: set ✔"
+        f"{common.margin * ' '}Location: set ✔"
         if data.get("location")
-        else f"{margin * ' '}Location: Not set ⚠️"
+        else f"{common.margin * ' '}Location: Not set ⚠️"
     )
-    print(f"{margin * ' '}Active Profile: {data.get('active_profile', 'None')}")
+    print(f"{common.margin * ' '}Active Profile: {data.get('active_profile', 'None')}")
 
-    print(f"{margin * ' '}┌─ Main Menu ────────────────────────────────────┐")
+    print(f"{common.margin * ' '}┌─ Main Menu ────────────────────────────────────┐")
 
     for idx, option in MENU_OPTIONS.items():
-        print(f"{margin * ' '}│  {idx}. {option:<41}  │")
+        print(f"{common.margin * ' '}│  {idx}. {option:<41}  │")
 
-    print(f"{margin * ' '}└────────────────────────────────────────────────┘")
+    print(f"{common.margin * ' '}└────────────────────────────────────────────────┘")
 
     while True:
         valid_option = False
@@ -74,7 +72,10 @@ def main():
                 print("Invalid input.")
 
         ROUTES[choice]()
+        os.system("cls" if os.name == "nt" else "clear")  # clear screen
+        break
 
 
 if __name__ == "__main__":
-    main()
+    while True:  # run app until exit
+        main()
