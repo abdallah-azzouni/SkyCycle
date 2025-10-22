@@ -27,10 +27,8 @@ source venv/bin/activate  # Linux/macOS
 venv\Scripts\activate     # Windows
 
 # Install dependencies
-pip install astral pytz
+pip install -r requirements.txt
 ```
-
-> **Note:** `astral` and `pytz` are required for sun calculations.
 
 ---
 
