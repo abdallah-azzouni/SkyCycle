@@ -1,11 +1,30 @@
 import common
 import os
-from routes import setup_location
+from routes import setup_location, add_profile
 
 
 def exit_program():
     print("\nExiting Sky Cycle. Goodbye! 👋")
     exit()
+
+
+MENU_OPTIONS = {
+    1: "Setup Location",
+    2: "Add Profile",
+    3: "Remove Profile",
+    4: "Activate Profile",
+    5: "Deactivate",
+    6: "Settings",
+    0: "Exit",
+}
+
+# Define pages you can switch too
+ROUTES = {
+    1: setup_location.setup_location,
+    2: add_profile.add_profile,
+    # 3: remove_profile,
+    0: exit_program,
+}
 
 
 def main():
@@ -16,66 +35,51 @@ def main():
     - Loads and updates persistent data.
     - Routes user choices to the appropriate module.
     """
-
-    # Load json file
-    data = common.load()
-
-    MENU_OPTIONS = {
-        1: "Setup Location",
-        2: "Add Profile",
-        3: "Remove Profile",
-        4: "Activate Profile",
-        5: "Deactivate",
-        6: "Settings",
-        0: "Exit",
-    }
-
-    # Define pages you can switch too
-    ROUTES = {
-        1: setup_location.setup_location,
-        # 2: add_profile,
-        # 3: remove_profile,
-        0: exit_program,
-    }
-
-    print(
-        f"{common.margin * ' '}╔════════════════════════════════════════════════╗\n{common.margin * ' '}║                 🌅 Sky Cycle                   ║\n{common.margin * ' '}╚════════════════════════════════════════════════╝"
-    )
-
-    print(
-        f"{common.margin * ' '}Location: set ✔"
-        if data.get("location")
-        else f"{common.margin * ' '}Location: Not set ⚠️"
-    )
-    print(f"{common.margin * ' '}Active Profile: {data.get('active_profile', 'None')}")
-
-    print(f"{common.margin * ' '}┌─ Main Menu ────────────────────────────────────┐")
-
-    for idx, option in MENU_OPTIONS.items():
-        print(f"{common.margin * ' '}│  {idx}. {option:<41}  │")
-
-    print(f"{common.margin * ' '}└────────────────────────────────────────────────┘")
+    common.init()
 
     while True:
-        valid_option = False
-        data = common.load()  # reload data to stay updated
+        _ = os.system("cls" if os.name == "nt" else "clear")  # clear screen
+
+        # Load json file
+        data = common.read()
+
+        print(
+            f"{common.margin * ' '}╔════════════════════════════════════════════════╗\n{common.margin * ' '}║                 🌅 Sky Cycle                   ║\n{common.margin * ' '}╚════════════════════════════════════════════════╝"
+        )
+
+        print(
+            f"{common.margin * ' '}Location: set ✔"
+            if data.get("location")
+            else f"{common.margin * ' '}Location: Not set ⚠️"
+        )
+        print(
+            f"{common.margin * ' '}Active Profile: {data.get('active_profile', 'None')}"
+        )
+
+        print(
+            f"{common.margin * ' '}┌─ Main Menu ────────────────────────────────────┐"
+        )
+
+        for idx, option in MENU_OPTIONS.items():
+            print(f"{common.margin * ' '}│  {idx}. {option:<41}  │")
+
+        print(
+            f"{common.margin * ' '}└────────────────────────────────────────────────┘"
+        )
 
         # get user input
-        while not valid_option:
+        while True:
             try:
                 choice = int(input("Choose option [0-6]: "))
                 if choice in MENU_OPTIONS.keys():
-                    valid_option = True
+                    break
                 else:
                     print("Invalid option")
             except ValueError:
                 print("Invalid input.")
 
         ROUTES[choice]()
-        os.system("cls" if os.name == "nt" else "clear")  # clear screen
-        break
 
 
 if __name__ == "__main__":
-    while True:  # run app until exit
-        main()
+    main()

@@ -3,35 +3,34 @@ from astral import LocationInfo
 from astral.sun import sun
 from datetime import datetime
 import pytz
-from unicodedata import normalize
 import common
 from tzfpy import get_tz
 
 
-def normalize_text(text: str):
-    return normalize("NFKD", text).encode("ascii", "ignore").decode("utf-8").lower()
-
-
-def search_city(q: str) -> list[any]:
-    geolocator = Nominatim(user_agent="sky_cycle")
-    locations = geolocator.geocode(q, exactly_one=False, limit=5, language="en")
-    if not locations:
-        print("No results found.")
+def search_city(q: str):
+    try:
+        geolocator = Nominatim(user_agent="sky_cycle")
+        locations = geolocator.geocode(q, exactly_one=False, limit=5, language="en")
+        if not locations:
+            print("No results found.")
+            return []
+        print("Found locations:")
+        for i, loc in enumerate(locations, 1):
+            # map location into name, country
+            address_parts = [
+                p.strip() for p in loc.address.split(",")
+            ]  # make sure location is clean to map
+            name = address_parts[0] if address_parts else "Unknown"
+            country = address_parts[-1] if len(address_parts) > 1 else "Unknown"
+            lon_dir = "E" if loc.longitude >= 0 else "W"
+            print(
+                f"  {i}. {name}, {country} ({loc.latitude:.4f}°N, {abs(loc.longitude):.4f}°{lon_dir})"
+            )
+        print("  0. Quit\n")
+        return locations
+    except Exception as e:
+        print(f"⚠️ Could not find any results, try again later. Error: {e}")
         return []
-    print("Found locations:")
-    for i, loc in enumerate(locations, 1):
-        # map location into name, country
-        address_parts = [
-            p.strip() for p in loc.address.split(",")
-        ]  # make sure location is clean to map
-        name = address_parts[0] if address_parts else "Unknown"
-        country = address_parts[-1] if len(address_parts) > 1 else "Unknown"
-        lon_dir = "E" if loc.longitude >= 0 else "W"
-        print(
-            f"  {i}. {name}, {country} ({loc.latitude:.4f}°N, {abs(loc.longitude):.4f}°{lon_dir})"
-        )
-    print("  0. Quit\n")
-    return locations
 
 
 def setup_location():
@@ -43,10 +42,9 @@ def setup_location():
 
     while True:
         query = input("Enter location: ").strip()
-        clean_query = normalize_text(query)
 
         print(f'\n🔍 Searching for "{query}"...\n')
-        results = search_city(clean_query)
+        results = search_city(query)
         if not results:
             continue
 
@@ -88,15 +86,13 @@ def setup_location():
             print(f"⚠️ Could not calculate sun times: {e}")
             return
 
-        common.write(
+        common.update_location(
             {
-                "location": {
-                    "name": name,
-                    "country": country,
-                    "latitude": lat,
-                    "longitude": lon,
-                    "timezone": timezone_str,
-                }
+                "name": name,
+                "country": country,
+                "latitude": lat,
+                "longitude": lon,
+                "timezone": timezone_str,
             }
         )
 
@@ -107,5 +103,5 @@ def setup_location():
         print(f"  🌅 Sunrise: {s['sunrise'].strftime('%I:%M %p')}")
         print(f"  🌇 Sunset:  {s['sunset'].strftime('%I:%M %p')}")
 
-        input("\nPress Enter to return to main menu...")
+        _ = input("\nPress Enter to return to main menu...")
         break
