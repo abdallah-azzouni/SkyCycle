@@ -1,0 +1,15 @@
+[project]
+name = "skycycle"
+version = "0.1.0"
+description = "Add your description here"
+requires-python = ">=3.13"
+dependencies = [
+    "astral>=3.2",
+    "geopy>=2.4.1",
+    "pytz>=2025.2",
+    "tzfpy>=1.1.0",
+]
+
+
+[project.scripts]
+skycycle = "src.main:main"
