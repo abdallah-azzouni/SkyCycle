@@ -1,11 +1,17 @@
 import json
 import os
+import platform
 
 
 # ui options
 margin = 5
 
-CONFIG_DIR = os.path.expanduser("~/.config/SkyCycle")
+
+if platform.system() == "Windows":
+    CONFIG_DIR = os.path.join(os.getenv("APPDATA"), "SkyCycle")
+else:
+    CONFIG_DIR = os.path.expanduser("~/.config/SkyCycle")
+
 CONFIG_FILE = os.path.join(CONFIG_DIR, "data.json")
 PROFILES_DIR = os.path.join(CONFIG_DIR, "profiles")
 
@@ -40,7 +46,6 @@ def write(data):
     with open(tmp, "w") as f:
         json.dump(data, f, indent=2)
     os.replace(tmp, CONFIG_FILE)
-
 
 
 def add_profile(profile_name: str, profile_data):
