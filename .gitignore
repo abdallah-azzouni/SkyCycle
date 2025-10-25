@@ -1,3 +1,10 @@
-*.json
+# Virtual environment
+.venv/
+venv/
+
+# UV
+uv.lock
+.python-version
+
+# Python
 __pycache__/
-*.pyc
