@@ -34,11 +34,7 @@ def search_city(q: str):
 
 
 def setup_location():
-    print(
-        f"{common.margin * ' '}╔════════════════════════════════════════════════╗\n"
-        + f"{common.margin * ' '}║                Setup Location 📍               ║\n"
-        + f"{common.margin * ' '}╚════════════════════════════════════════════════╝"
-    )
+    common.draw_header("Setup Location 📍")
 
     while True:
         query = input("Enter location: ").strip()

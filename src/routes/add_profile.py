@@ -23,11 +23,7 @@ def copy_files(
 
 
 def add_profile():
-    print(
-        f"{common.margin * ' '}╔════════════════════════════════════════════════╗\n"
-        + f"{common.margin * ' '}║              Add New Profile                   ║\n"
-        + f"{common.margin * ' '}╚════════════════════════════════════════════════╝"
-    )
+    common.draw_header("Add New Profile ➕")
 
     print("\nStep 1/4: Profile Name")
     while True:
