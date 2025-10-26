@@ -6,9 +6,11 @@ from wcwidth import wcswidth
 # ui options
 margin = 5
 
+user_platform = None
 
 if platform.system() == "Windows":
     CONFIG_DIR = os.path.join(os.getenv("APPDATA"), "SkyCycle")
+    user_platform = "Windows"
 else:
     CONFIG_DIR = os.path.expanduser("~/.config/SkyCycle")
 
@@ -24,7 +26,12 @@ def init():
 
     # Create default config if it doesn't exist
     if not os.path.exists(CONFIG_FILE):
-        default_config = {"location": None, "active_profile": None, "profiles": {}}
+        default_config = {
+            "platform": user_platform,
+            "location": None,
+            "active_profile": None,
+            "profiles": {},
+        }
         write(default_config)
 
 

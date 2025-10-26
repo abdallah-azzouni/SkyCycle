@@ -50,6 +50,9 @@ def main():
             if data.get("location")
             else f"{common.margin * ' '}Location: Not set ⚠️"
         )
+
+        print(f"{common.margin * ' '}Platform: {data.get('platform', 'Not set ⚠️')}")
+
         print(
             f"{common.margin * ' '}Active Profile: {data.get('active_profile', 'None')}"
         )
