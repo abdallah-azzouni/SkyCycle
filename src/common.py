@@ -1,8 +1,12 @@
+import readline  # Enables arrow key navigation in input()
 import json
 import os
 import platform
 from wcwidth import wcswidth
-import readline  # Enables arrow key navigation in input()
+from astral import LocationInfo
+from astral.sun import sun
+from datetime import datetime
+import pytz
 
 # ui options
 margin = 5
@@ -17,6 +21,15 @@ else:
 
 CONFIG_FILE = os.path.join(CONFIG_DIR, "data.json")
 PROFILES_DIR = os.path.join(CONFIG_DIR, "profiles")
+
+
+DEFAULT_COMMANDS = {
+    "Windows": 'reg add "HKEY_CURRENT_USER\\Control Panel\\Desktop" /v Wallpaper /t REG_SZ /d "{image}" /f && RUNDLL32.EXE user32.dll,UpdatePerUserSystemParameters',
+    "Linux (KDE)": 'qdbus org.kde.plasmashell /PlasmaShell org.kde.PlasmaShell.evaluateScript \'var allDesktops = desktops();for (i=0;i<allDesktops.length;i++) {{d = allDesktops[i];d.wallpaperPlugin = "org.kde.image";d.currentConfigGroup = Array("Wallpaper", "org.kde.image", "General");d.writeConfig("Image", "file://{image}")}}\'',
+    "Linux (GNOME)": 'gsettings set org.gnome.desktop.background picture-uri "file://{image}"',
+    "Linux (XFCE)": 'xfconf-query -c xfce4-desktop -p /backdrop/screen0/monitor0/workspace0/last-image -s "{image}"',
+    "macOS": 'osascript -e \'tell application "System Events" to tell every desktop to set picture to "{image}"\'',
+}
 
 
 def init():
@@ -112,3 +125,16 @@ def update_platform(platform, command=None):
     config["platform"] = platform
     config["custom_command"] = command
     write(config)
+
+
+def calculate_sun_times(name, country, lat, lon, timezone_str) -> dict:
+    tz = pytz.timezone(timezone_str)
+    city = LocationInfo(name, country, timezone_str, lat, lon)
+    today = datetime.now(tz).date()
+    try:
+        s = sun(city.observer, date=today, tzinfo=tz)
+    except Exception as e:
+        print(f"⚠️ Could not calculate sun times: {e}")
+        return None
+
+    return s
