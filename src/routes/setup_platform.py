@@ -1,5 +1,4 @@
 import common
-import readline
 
 
 def setup_platform():

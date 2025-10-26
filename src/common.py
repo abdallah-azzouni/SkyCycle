@@ -2,6 +2,7 @@ import json
 import os
 import platform
 from wcwidth import wcswidth
+import readline  # Enables arrow key navigation in input()
 
 # ui options
 margin = 5
