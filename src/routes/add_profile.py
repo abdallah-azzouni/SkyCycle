@@ -139,7 +139,7 @@ def add_profile():
         )
         print(f"\n✓ Profile {profile_name} created successfully!")
 
-        _ = input("\nPress Enter to return to main menu...")
+        common.return_to_main_menu()
         return
 
     else:

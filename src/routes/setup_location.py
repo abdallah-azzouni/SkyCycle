@@ -100,5 +100,5 @@ def setup_location():
         print(f"  🌅 Sunrise: {s['sunrise'].strftime('%I:%M %p')}")
         print(f"  🌇 Sunset:  {s['sunset'].strftime('%I:%M %p')}")
 
-        _ = input("\nPress Enter to return to main menu...")
+        common.return_to_main_menu()
         break

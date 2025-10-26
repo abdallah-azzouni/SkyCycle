@@ -36,6 +36,10 @@ def init():
         write(default_config)
 
 
+def return_to_main_menu():
+    _ = input("\nPress Enter to return to main menu...")
+
+
 def draw_header(title: str):
     display_width = wcswidth(title)
     # Fallback if wcwidth returns -1 (control characters)

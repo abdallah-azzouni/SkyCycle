@@ -30,4 +30,4 @@ def setup_platform():
 
     print("\nPlatform set to:", platforms[choice - 1])
 
-    _ = input("\nPress Enter to return to main menu...")
+    common.return_to_main_menu()

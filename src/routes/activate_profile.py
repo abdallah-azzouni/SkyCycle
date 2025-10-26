@@ -7,6 +7,11 @@ def activate_profile():
     config = common.read()
 
     if config.get("platform") is None:
-        print("\nPlease pick a platform from Settings before activating a profile.")
+        print("\n⚠️  Platform not set! Please setup platform first.")
+        common.return_to_main_menu()
+        return
 
-    _ = input("\nPress Enter to return to main menu...")
+    if config.get("location") is None:
+        print("\n⚠️  Location not set! Please setup location first.")
+        common.return_to_main_menu()
+        return

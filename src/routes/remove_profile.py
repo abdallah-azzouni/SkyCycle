@@ -11,7 +11,7 @@ def remove_profile():
 
     if not config["profiles"]:
         print("No profiles found.")
-        _ = input("\nPress Enter to return to main menu...")
+        common.return_to_main_menu()
         return
 
     print("\nSaved Profiles:")
@@ -66,4 +66,4 @@ def remove_profile():
         except Exception as e:
             print(f"⚠️ Error: {e}")
 
-    _ = input("\nPress Enter to return to main menu...")
+    common.return_to_main_menu()
