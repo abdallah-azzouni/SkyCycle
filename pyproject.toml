@@ -8,6 +8,7 @@ dependencies = [
     "geopy>=2.4.1",
     "pytz>=2025.2",
     "tzfpy>=1.1.0",
+    "wcwidth>=0.2.14",
 ]
 
 

@@ -1,7 +1,7 @@
 import json
 import os
 import platform
-
+from wcwidth import wcswidth
 
 # ui options
 margin = 5
@@ -26,6 +26,21 @@ def init():
     if not os.path.exists(CONFIG_FILE):
         default_config = {"location": None, "active_profile": None, "profiles": {}}
         write(default_config)
+
+
+def draw_header(title: str):
+    display_width = wcswidth(title)
+    # Fallback if wcwidth returns -1 (control characters)
+    if display_width < 0:
+        display_width = len(title)
+
+    total_padding = 48 - display_width
+    left_padding = total_padding // 2
+    right_padding = total_padding - left_padding
+
+    print(f"{margin * ' '}╔════════════════════════════════════════════════╗")
+    print(f"{margin * ' '}║{left_padding * ' '}{title}{right_padding * ' '}║")
+    print(f"{margin * ' '}╚════════════════════════════════════════════════╝")
 
 
 def read():
