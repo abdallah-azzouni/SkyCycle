@@ -28,6 +28,7 @@ def init():
     if not os.path.exists(CONFIG_FILE):
         default_config = {
             "platform": user_platform,
+            "custom_command": None,
             "location": None,
             "active_profile": None,
             "profiles": {},
@@ -98,4 +99,11 @@ def update_active_profile(profile_name: str):
 def update_location(location_data):
     config = read()
     config["location"] = location_data
+    write(config)
+
+
+def update_platform(platform, command=None):
+    config = read()
+    config["platform"] = platform
+    config["custom_command"] = command
     write(config)

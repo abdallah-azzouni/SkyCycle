@@ -1,6 +1,12 @@
 import common
 import os
-from routes import setup_location, add_profile, remove_profile
+from routes import (
+    setup_location,
+    add_profile,
+    remove_profile,
+    activate_profile,
+    setup_platform,
+)
 
 
 def exit_program():
@@ -14,7 +20,7 @@ MENU_OPTIONS = {
     3: "Remove Profile",
     4: "Activate Profile",
     5: "Deactivate",
-    6: "Settings",
+    6: "Setup Platform",
     0: "Exit",
 }
 
@@ -23,6 +29,8 @@ ROUTES = {
     1: setup_location.setup_location,
     2: add_profile.add_profile,
     3: remove_profile.remove_profile,
+    4: activate_profile.activate_profile,
+    6: setup_platform.setup_platform,
     0: exit_program,
 }
 
