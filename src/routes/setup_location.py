@@ -1,8 +1,5 @@
 from geopy.geocoders import Nominatim
-from astral import LocationInfo
-from astral.sun import sun
-from datetime import datetime
-import pytz
+
 import common
 from tzfpy import get_tz
 
@@ -26,7 +23,7 @@ def search_city(q: str):
             print(
                 f"  {i}. {name}, {country} ({loc.latitude:.4f}°N, {abs(loc.longitude):.4f}°{lon_dir})"
             )
-        print("  0. Quit\n")
+        print("  0. Cancel\n")
         return locations
     except Exception as e:
         print(f"⚠️ Could not find any results, try again later. Error: {e}")
@@ -73,15 +70,6 @@ def setup_location():
             print("⚠️ Could not determine timezone. Falling back to UTC.")
             timezone_str = "UTC"
 
-        tz = pytz.timezone(timezone_str)
-        city = LocationInfo(name, country, timezone_str, lat, lon)
-        today = datetime.now(tz).date()
-        try:
-            s = sun(city.observer, date=today, tzinfo=tz)
-        except Exception as e:
-            print(f"⚠️ Could not calculate sun times: {e}")
-            return
-
         common.update_location(
             {
                 "name": name,
@@ -92,12 +80,16 @@ def setup_location():
             }
         )
 
+        sun = common.calculate_sun_times(name, country, lat, lon, timezone_str)
+        if sun is None:
+            return
+
         print(f"\n✓ Location set to: {name}, {country}")
         print(f"  Latitude: {lat:.4f}°")
         print(f"  Longitude: {lon:.4f}°")
         print(f"  Timezone: {timezone_str}")
-        print(f"  🌅 Sunrise: {s['sunrise'].strftime('%I:%M %p')}")
-        print(f"  🌇 Sunset:  {s['sunset'].strftime('%I:%M %p')}")
+        print(f"  🌅 Sunrise: {sun['sunrise'].strftime('%I:%M %p')}")
+        print(f"  🌇 Sunset:  {sun['sunset'].strftime('%I:%M %p')}")
 
         common.return_to_main_menu()
         break
