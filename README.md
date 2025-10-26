@@ -38,7 +38,13 @@ skycycle.exe
 ### Option 2: Build from Source
 ```bash
 # Install UV
+
+# Linux
 curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Windows
+powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+
 
 # Clone and build
 git clone https://github.com/abdallah-azzouni/SkyCycle.git
