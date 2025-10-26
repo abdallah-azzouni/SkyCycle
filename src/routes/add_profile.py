@@ -1,6 +1,7 @@
 import common
 import os
 import shutil
+import readline
 
 
 def copy_files(

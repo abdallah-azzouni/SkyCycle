@@ -5,6 +5,7 @@ from datetime import datetime
 import pytz
 import common
 from tzfpy import get_tz
+import readline
 
 
 def search_city(q: str):
