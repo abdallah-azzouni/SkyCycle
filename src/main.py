@@ -1,6 +1,6 @@
 import common
 import os
-from routes import setup_location, add_profile
+from routes import setup_location, add_profile, remove_profile
 
 
 def exit_program():
@@ -22,7 +22,7 @@ MENU_OPTIONS = {
 ROUTES = {
     1: setup_location.setup_location,
     2: add_profile.add_profile,
-    # 3: remove_profile,
+    3: remove_profile.remove_profile,
     0: exit_program,
 }
 
@@ -43,9 +43,7 @@ def main():
         # Load json file
         data = common.read()
 
-        print(
-            f"{common.margin * ' '}╔════════════════════════════════════════════════╗\n{common.margin * ' '}║                 🌅 Sky Cycle                   ║\n{common.margin * ' '}╚════════════════════════════════════════════════╝"
-        )
+        common.draw_header("🌅 Sky Cycle")
 
         print(
             f"{common.margin * ' '}Location: set ✔"
