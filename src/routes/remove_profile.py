@@ -9,7 +9,7 @@ def remove_profile():
     config = common.read()
 
     if not config["profiles"]:
-        print("No profiles found.")
+        print("⚠️  No profiles available. Please add a profile first.")
         common.return_to_main_menu()
         return
 
@@ -19,14 +19,11 @@ def remove_profile():
     for i, profile_name in enumerate(profiles, start=1):
         image_count = config["profiles"][profile_name]["image_count"]
         print(f"  {i}. {profile_name} ({image_count} images)")
+    print("  0. Cancel")
 
     while True:
         try:
-            choice = int(
-                input(
-                    f"\nSelect profile to remove [1-{len(profiles)}, or 0 to cancel]: "
-                )
-            )
+            choice = int(input(f"\nSelect profile to remove [0-{len(profiles)}]: "))
 
             if choice == 0:
                 return
