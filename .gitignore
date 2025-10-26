@@ -3,7 +3,6 @@
 venv/
 
 # UV
-uv.lock
 .python-version
 
 # Python
