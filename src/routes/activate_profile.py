@@ -18,7 +18,7 @@ def activate_profile():
         common.return_to_main_menu()
         return
 
-    if config["profiles"] is None:
+    if not config.get("profiles"):
         print("⚠️  No profiles available. Please add a profile first.")
 
     print("\nSaved Profiles:")
@@ -43,7 +43,7 @@ def activate_profile():
 
         break
 
-    profile_name = profiles[choice - 1]
+    profile_name: str = profiles[choice - 1]
     folder_path = config["profiles"][profile_name]["folder"]
 
     if profile_name == config["active_profile"]:
@@ -66,24 +66,24 @@ def activate_profile():
 
     print(
         f"\n📍 Location: {config['location']['name']}, {config['location']['country']}",
-        f"\n🕐 Current time: {datetime.now(pytz.timezone(location_data[4])).strftime('%I:%M %p')}",
+        f"\n🕐 Current time: {datetime.now(pytz.timezone(location_data[4])).strftime('%I:%M %p')}\n",
         "\n☀️  Sun times today:",
-        f"\n  Sunrise: {sun['sunrise'].strftime('%I:%M %p')}",
-        f"\n  Sunset:  {sun['sunset'].strftime('%I:%M %p')}",
     )
+    for keyframe, value in config["profiles"][profile_name]["keyframes"].items():
+        print(f" {keyframe}: {sun[keyframe].strftime('%I:%M %p')} -> {value}")
+
+    choice = input("\n⚠️  Are you sure you want to activate this profile? [y/n]: ")
+
+    if choice.lower() != "y" or choice.lower() != "yes" or choice.lower() != "":
+        common.return_to_main_menu()
+        return
+
+    common.update_active_profile(profile_name)
+    common.restart_runner()
+
+    print(f'✓ Profile "{profile_name}" is now active!')
+    print("Your wallpaper will automatically change based on the sun's position.")
+
+    # start runner in background
 
     common.return_to_main_menu()
-
-
-"""
-🖼️  Setting wallpaper to image 017.jpg...
-✓ Wallpaper updated!
-
-⏰ Setting up automatic updates (every 15 minutes)...
-✓ Scheduler configured!
-
-✓ Profile "Mountain Dawn" is now active!
-
-Your wallpaper will automatically change based on the sun's position.
-
-"""
