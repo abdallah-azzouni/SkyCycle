@@ -3,15 +3,18 @@ import json
 import os
 import platform
 from wcwidth import wcswidth
-from astral import LocationInfo
-from astral.sun import sun
+from astral import Degrees, LocationInfo
+from astral.sun import sun, midnight
 from datetime import datetime
 import pytz
+import subprocess
+import sys
 
 # ui options
 margin = 5
 
 user_platform = None
+
 
 if platform.system() == "Windows":
     CONFIG_DIR = os.path.join(os.getenv("APPDATA"), "SkyCycle")
@@ -22,6 +25,18 @@ else:
 CONFIG_FILE = os.path.join(CONFIG_DIR, "data.json")
 PROFILES_DIR = os.path.join(CONFIG_DIR, "profiles")
 
+executable: str = ""
+# Determine executable name and base directory based on if compiled or not
+if getattr(sys, "frozen", False):
+    executable = "skycycle"
+    base_dir = os.path.dirname(sys.executable)  # compiled binary
+else:
+    executable = "skycycle.py"
+    base_dir = os.path.dirname(os.path.abspath(__file__))  # source
+
+RUNNER_FILE = os.path.join(
+    base_dir, "skycycle-runner.bat" if os.name == "nt" else "skycycle-runner.sh"
+)
 
 DEFAULT_COMMANDS = {
     "Windows": 'reg add "HKEY_CURRENT_USER\\Control Panel\\Desktop" /v Wallpaper /t REG_SZ /d "{image}" /f && RUNDLL32.EXE user32.dll,UpdatePerUserSystemParameters',
@@ -33,6 +48,7 @@ DEFAULT_COMMANDS = {
 
 
 def init():
+    global executable, user_platform
     """Initialize config directory and files. Call this once at app startup."""
     # Create directories if they don't exist
     os.makedirs(CONFIG_DIR, exist_ok=True)
@@ -49,7 +65,23 @@ def init():
         }
         write(default_config)
 
+    # Create runner script
+    if not os.path.exists(RUNNER_FILE):
+        content = ""
+        if user_platform == "Windows":
+            executable = executable + ".exe" if executable[-3:] != "py" else executable
+            content = f"@echo off\n:loop\n{executable} --update-wallpaper\ntimeout /t 60 >nul\ngoto loop"
+        else:
+            content = f"#!/bin/bash\nwhile true; do\n  ./{executable} --update-wallpaper\n  sleep 60\ndone"
 
+        with open(RUNNER_FILE, "w") as f:
+            _ = f.write(content)
+
+        if user_platform != "Windows":
+            os.chmod(RUNNER_FILE, 0o755)
+
+
+# user interface functions #####################################################
 def return_to_main_menu():
     _ = input("\nPress Enter to return to main menu...")
 
@@ -69,6 +101,10 @@ def draw_header(title: str):
     print(f"{margin * ' '}╚════════════════════════════════════════════════╝")
 
 
+#################################################################################
+
+
+# I/O functions ###############################################################
 def read():
     """Read config file"""
     if not os.path.exists(CONFIG_FILE):
@@ -92,7 +128,7 @@ def write(data):
 def add_profile(profile_name: str, profile_data):
     """Add or update a profile in config"""
     config = read()
-    if config.get("profiles", None) == None:
+    if not config.get("profiles"):
         config["profiles"] = {}
     config["profiles"][profile_name] = profile_data
     write(config)
@@ -101,7 +137,7 @@ def add_profile(profile_name: str, profile_data):
 def remove_profile(profile_name: str):
     """Remove a profile from config"""
     config = read()
-    if config.get("profiles", None) == None:
+    if not config.get("profiles"):
         config["profiles"] = {}
     if profile_name in config["profiles"]:
         del config["profiles"][profile_name]
@@ -120,21 +156,48 @@ def update_location(location_data):
     write(config)
 
 
-def update_platform(platform, command=None):
+def update_platform(platform: str, command: str | None = None):
     config = read()
     config["platform"] = platform
     config["custom_command"] = command
     write(config)
 
 
-def calculate_sun_times(name, country, lat, lon, timezone_str) -> dict:
+################################################################################
+
+
+def calculate_sun_times(
+    name: str, country: str, lat: float, lon: float, timezone_str: str
+):
     tz = pytz.timezone(timezone_str)
     city = LocationInfo(name, country, timezone_str, lat, lon)
     today = datetime.now(tz).date()
     try:
         s = sun(city.observer, date=today, tzinfo=tz)
+        s["midnight"] = midnight(city.observer, date=today, tzinfo=tz)
     except Exception as e:
         print(f"⚠️ Could not calculate sun times: {e}")
-        return None
+        return
 
     return s
+
+
+def restart_runner():
+    if platform.system() == "Windows":
+        # Kill existing runner batch file processes
+        _ = subprocess.run(
+            ["taskkill", "/FI", "WINDOWTITLE eq *skycycle-runner*", "/F"],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
+
+        _ = subprocess.Popen([RUNNER_FILE], creationflags=subprocess.CREATE_NO_WINDOW)
+
+    else:
+        # Kill by script name
+        _ = subprocess.run(
+            ["pkill", "-f", "skycycle-runner.sh"],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
+        _ = subprocess.Popen([RUNNER_FILE])
