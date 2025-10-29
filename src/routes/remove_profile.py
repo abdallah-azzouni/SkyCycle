@@ -43,7 +43,7 @@ def remove_profile():
     print("\n⚠️  This will remove the profile from the list.")
 
     x = input("\nAre you sure? [Y/n]: ")
-    if x.lower() == "y" or x == "":
+    if x.lower() == "y" or x == "yes" or x == "":
         try:
             # Remove from JSON
             common.remove_profile(profile_name)
