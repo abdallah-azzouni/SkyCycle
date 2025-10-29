@@ -1,7 +1,7 @@
 import common
 import argparse
 import os
-import runner
+import wallpaper_updater
 from routes import (
     setup_location,
     add_profile,
@@ -95,13 +95,13 @@ def main():
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="SkyCycle Application")
     _ = parser.add_argument(
-        "--runner",
+        "--update-wallpaper",
         action="store_true",
         help="Run the wallpaper changer in the background",
     )
     args = parser.parse_args()
 
-    if args.runner:
-        runner.run()
+    if args.update_wallpaper:
+        wallpaper_updater.run()
     else:
         main()
