@@ -48,6 +48,10 @@ def activate_profile():
 
     if profile_name == config["active_profile"]:
         print(f'ℹ️  "{profile_name}" is already active.')
+        choice = input("\nDo you want to refresh the runner? [Y/n]: ")
+        if choice.lower() == "y" or choice.lower() == "yes" or choice.lower() == "":
+            common.restart_runner()
+
         common.return_to_main_menu()
         return
 
@@ -64,6 +68,10 @@ def activate_profile():
         location_data[4],
     )
 
+    if sun is None:
+        common.return_to_main_menu()
+        return
+
     print(
         f"\n📍 Location: {config['location']['name']}, {config['location']['country']}",
         f"\n🕐 Current time: {datetime.now(pytz.timezone(location_data[4])).strftime('%I:%M %p')}\n",
@@ -72,9 +80,10 @@ def activate_profile():
     for keyframe, value in config["profiles"][profile_name]["keyframes"].items():
         print(f" {keyframe}: {sun[keyframe].strftime('%I:%M %p')} -> {value}")
 
-    choice = input("\n⚠️  Are you sure you want to activate this profile? [y/n]: ")
+    choice = input("\n⚠️  Are you sure you want to activate this profile? [Y/n]: ")
 
-    if choice.lower() != "y" or choice.lower() != "yes" or choice.lower() != "":
+    if choice.lower() != "y" and choice.lower() != "yes" and choice.lower() != "":
+        print("Cancelled.")
         common.return_to_main_menu()
         return
 
