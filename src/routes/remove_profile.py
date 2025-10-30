@@ -37,6 +37,19 @@ def remove_profile():
         break
 
     profile_name = profiles[choice - 1]
+    if profile_name == config["active_profile"]:
+        choice = input(
+            f"{profile_name} is currently active. Do you want to Deactivate it? [Y/n]"
+        )
+        if choice.lower() != "y" and choice != "yes" and choice != "":
+            print("Cancelled.")
+            common.return_to_main_menu()
+            return
+        else:
+            common.update_active_profile(None)
+            common.kill_runner()
+            print(f"✓ Profile {profile_name} deactivated")
+
     folder_path = config["profiles"][profile_name]["folder"]
 
     print(f"\nYou selected: {profile_name}\nFolder: {folder_path}")
