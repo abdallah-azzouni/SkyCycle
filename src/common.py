@@ -24,14 +24,14 @@ else:
 
 CONFIG_FILE = os.path.join(CONFIG_DIR, "data.json")
 PROFILES_DIR = os.path.join(CONFIG_DIR, "profiles")
+PID_FILE = os.path.join(CONFIG_DIR, "runner.pid")
 
-executable: str = ""
 # Determine executable name and base directory based on if compiled or not
 if getattr(sys, "frozen", False):
-    executable = "skycycle"
+    compiled = True
     base_dir = os.path.dirname(sys.executable)  # compiled binary
 else:
-    executable = "skycycle.py"
+    compiled = False
     base_dir = os.path.dirname(os.path.abspath(__file__))  # source
 
 RUNNER_FILE = os.path.join(
@@ -48,7 +48,7 @@ DEFAULT_COMMANDS = {
 
 
 def init():
-    global executable, user_platform
+    global compiled, user_platform
     """Initialize config directory and files. Call this once at app startup."""
     # Create directories if they don't exist
     os.makedirs(CONFIG_DIR, exist_ok=True)
@@ -69,10 +69,15 @@ def init():
     if not os.path.exists(RUNNER_FILE):
         content = ""
         if user_platform == "Windows":
-            executable = executable + ".exe" if executable[-3:] != "py" else executable
-            content = f"@echo off\n:loop\n{executable} --update-wallpaper\ntimeout /t 60 >nul\ngoto loop"
+            if compiled:
+                content = "@echo off\n:loop\ncd %~dp0\nskycycle.exe --update-wallpaper\ntimeout /t 60 >nul\ngoto loop"
+            else:
+                content = "@echo off\n:loop\ncd %~dp0\nuv run main.py --update-wallpaper\ntimeout /t 60 >nul\ngoto loop"
         else:
-            content = f"#!/bin/bash\nwhile true; do\n  ./{executable} --update-wallpaper\n  sleep 60\ndone"
+            if compiled:
+                content = '#!/bin/bash\ncd $(dirname "$0")\nwhile true; do\n ./skycycle --update-wallpaper\n  sleep 60\ndone'
+            else:
+                content = '#!/bin/bash\ncd $(dirname "$0")\nwhile true; do\nuv run ./main.py --update-wallpaper\n  sleep 60\ndone'
 
         with open(RUNNER_FILE, "w") as f:
             _ = f.write(content)
@@ -144,7 +149,7 @@ def remove_profile(profile_name: str):
         write(config)
 
 
-def update_active_profile(profile_name: str):
+def update_active_profile(profile_name):
     config = read()
     config["active_profile"] = profile_name
     write(config)
@@ -175,6 +180,9 @@ def calculate_sun_times(
     try:
         s = sun(city.observer, date=today, tzinfo=tz)
         s["midnight"] = midnight(city.observer, date=today, tzinfo=tz)
+        used_times = {"sunrise", "noon", "sunset", "midnight"}
+        s = {k: v for k, v in s.items() if k in used_times}
+
     except Exception as e:
         print(f"⚠️ Could not calculate sun times: {e}")
         return
@@ -182,22 +190,45 @@ def calculate_sun_times(
     return s
 
 
-def restart_runner():
-    if platform.system() == "Windows":
-        # Kill existing runner batch file processes
-        _ = subprocess.run(
-            ["taskkill", "/FI", "WINDOWTITLE eq *skycycle-runner*", "/F"],
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
-        )
+def kill_runner():
+    # Kill old process if exists
+    if os.path.exists(PID_FILE):
+        try:
+            with open(PID_FILE, "r") as f:
+                pid = int(f.read().strip())
 
-        _ = subprocess.Popen([RUNNER_FILE], creationflags=subprocess.CREATE_NO_WINDOW)
+            if platform.system() == "Windows":
+                _ = subprocess.run(
+                    ["taskkill", "/PID", str(pid), "/F"],
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                )
+            else:
+                _ = subprocess.run(
+                    ["kill", str(pid)],
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                )
+        except:
+            pass
+
+
+def restart_runner():
+    kill_runner()
+
+    if platform.system() == "Windows":
+        process = subprocess.Popen(
+            [RUNNER_FILE],
+            creationflags=subprocess.CREATE_NEW_PROCESS_GROUP
+            | subprocess.CREATE_NO_WINDOW,
+        )
 
     else:
-        # Kill by script name
-        _ = subprocess.run(
-            ["pkill", "-f", "skycycle-runner.sh"],
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
+        process = subprocess.Popen(
+            [RUNNER_FILE],
+            start_new_session=True,
         )
-        _ = subprocess.Popen([RUNNER_FILE])
+
+    # Save PID
+    with open(PID_FILE, "w") as f:
+        _ = f.write(str(process.pid))
