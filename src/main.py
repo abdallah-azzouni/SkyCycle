@@ -8,6 +8,7 @@ from routes import (
     remove_profile,
     activate_profile,
     setup_platform,
+    deactivate_profile,
 )
 
 
@@ -21,7 +22,7 @@ MENU_OPTIONS = {
     2: "Add Profile",
     3: "Remove Profile",
     4: "Activate Profile",
-    5: "Deactivate",
+    5: "Deactivate Profile",
     6: "Setup Platform",
     0: "Exit",
 }
@@ -32,6 +33,7 @@ ROUTES = {
     2: add_profile.add_profile,
     3: remove_profile.remove_profile,
     4: activate_profile.activate_profile,
+    5: deactivate_profile.deactivate_profile,
     6: setup_platform.setup_platform,
     0: exit_program,
 }
@@ -97,7 +99,7 @@ if __name__ == "__main__":
     _ = parser.add_argument(
         "--update-wallpaper",
         action="store_true",
-        help="Run the wallpaper changer in the background",
+        help="Update wallpaper",
     )
     args = parser.parse_args()
 
