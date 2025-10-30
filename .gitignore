@@ -11,3 +11,5 @@ __pycache__/
 # runner
 skycycle-runner.bat
 skycycle-runner.sh
+
+pyrightconfig.json
