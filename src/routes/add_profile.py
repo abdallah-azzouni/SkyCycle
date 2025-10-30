@@ -1,6 +1,12 @@
 import common
 import os
 import shutil
+import re
+
+
+def numeric_key(name: str):
+    match = re.search(r"\d+", name)
+    return int(match.group()) if match else float("inf")
 
 
 def copy_files(
@@ -56,7 +62,9 @@ def add_profile():
             for f in os.listdir(wallpapers_path)
             if os.path.splitext(f)[1].lower() in {".jpg", ".jpeg", ".png"}
         ]
-        images: list[str] = sorted(images, key=lambda s: s.lower())
+
+        images = sorted(images, key=numeric_key)
+
         count = len(images)
         profile_folder = os.path.join(common.PROFILES_DIR, profile_name)
 
@@ -71,6 +79,7 @@ def add_profile():
         "Images will be COPIED (originals untouched) and renamed for indexing. Proceed? [Y/n]: "
     )
     if choice.lower() == "y" or choice == "":
+        print("Copying files...")
         copy_files(profile_name, wallpapers_path, profile_folder, images)
 
     else:
