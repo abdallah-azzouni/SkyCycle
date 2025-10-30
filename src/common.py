@@ -40,7 +40,11 @@ RUNNER_FILE = os.path.join(
 
 DEFAULT_COMMANDS = {
     "Windows": 'reg add "HKEY_CURRENT_USER\\Control Panel\\Desktop" /v Wallpaper /t REG_SZ /d "{image}" /f && RUNDLL32.EXE user32.dll,UpdatePerUserSystemParameters',
-    "Linux (KDE)": 'qdbus org.kde.plasmashell /PlasmaShell org.kde.PlasmaShell.evaluateScript \'var allDesktops = desktops();for (i=0;i<allDesktops.length;i++) {{d = allDesktops[i];d.wallpaperPlugin = "org.kde.image";d.currentConfigGroup = Array("Wallpaper", "org.kde.image", "General");d.writeConfig("Image", "file://{image}")}}\'',
+
+    "Linux (KDE)": '''qdbus6 org.kde.plasmashell /PlasmaShell org.kde.PlasmaShell.evaluateScript "
+    var allDesktops = desktops();for (i=0;i<allDesktops.length;i++) {d = allDesktops[i];d.wallpaperPlugin = 'org.kde.image';
+    d.currentConfigGroup = Array('Wallpaper','org.kde.image','General');d.writeConfig('Image', 'file://{image}');}"''',
+
     "Linux (GNOME)": 'gsettings set org.gnome.desktop.background picture-uri "file://{image}"',
     "Linux (XFCE)": 'xfconf-query -c xfce4-desktop -p /backdrop/screen0/monitor0/workspace0/last-image -s "{image}"',
     "macOS": 'osascript -e \'tell application "System Events" to tell every desktop to set picture to "{image}"\'',
