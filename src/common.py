@@ -1,4 +1,3 @@
-import readline  # Enables arrow key navigation in input()
 import json
 import os
 import platform
@@ -20,6 +19,7 @@ if platform.system() == "Windows":
     CONFIG_DIR = os.path.join(os.getenv("APPDATA"), "SkyCycle")
     user_platform = "Windows"
 else:
+    import readline  # Enables arrow key navigation in input() on linux
     CONFIG_DIR = os.path.expanduser("~/.config/SkyCycle")
 
 CONFIG_FILE = os.path.join(CONFIG_DIR, "data.json")
