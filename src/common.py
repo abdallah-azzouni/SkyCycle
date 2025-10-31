@@ -66,6 +66,7 @@ def init():
             "location": None,
             "active_profile": None,
             "profiles": {},
+            "cached_sun_times" : None,
         }
         write(default_config)
 
@@ -169,6 +170,11 @@ def update_platform(platform: str, command: str | None = None):
     config = read()
     config["platform"] = platform
     config["custom_command"] = command
+    write(config)
+
+def update_cached_sun_times(sun_times):
+    config = read()
+    config["cached_sun_times"] = sun_times
     write(config)
 
 

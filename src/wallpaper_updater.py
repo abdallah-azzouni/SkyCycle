@@ -22,6 +22,8 @@ def run():
     active_profile = config.get("active_profile")
     current_profile = config.get("profiles").get(active_profile)
     user_platform = config.get("platform")
+    cached_sun_times = config.get("cached_sun_times")
+
     location_data = config.get("location")
 
     tz = pytz.timezone(location_data["timezone"])
@@ -32,18 +34,38 @@ def run():
         print("Please activate profile from main menu")
         return
 
-    s = common.calculate_sun_times(
-        location_data["name"],
-        location_data["country"],
-        location_data["latitude"],
-        location_data["longitude"],
-        location_data["timezone"],
-    )
+
+
+    if cached_sun_times is None:
+        need_update = True
+    else:
+        cached_date = datetime.fromisoformat(cached_sun_times["date"]).date()
+        need_update = cached_date < datetime.now(tz).date()
+
+    if need_update:
+        s = common.calculate_sun_times(
+            location_data["name"],
+            location_data["country"],
+            location_data["latitude"],
+            location_data["longitude"],
+            location_data["timezone"],
+        )
+        if s is None:
+            print("Error: Could not calculate sun times")
+            s = {k: datetime.fromisoformat(v) for k, v in cached_sun_times["sun_times"].items()}
+        else:
+            common.update_cached_sun_times({
+                "date": datetime.now(tz).date().isoformat(),
+                "sun_times": {k: v.isoformat() for k, v in s.items()}
+            })
+
+
+    else:
+        s = {k: datetime.fromisoformat(v) for k, v in cached_sun_times["sun_times"].items()}
+
 
     if s is None:
-        print("Error: Missing data")
-        print("Please activate profile from main menu")
-        common.return_to_main_menu()
+        print("Error: Could not calculate sun times")
         return
 
     keyframes = current_profile["keyframes"]
@@ -74,5 +96,5 @@ def run():
         img_path = f"{img_base}.{ext}"
         if os.path.exists(img_path):
             command = common.DEFAULT_COMMANDS[user_platform].replace("{image}", img_path)
-            subprocess.run(command, shell=True)
+            subprocess.run(command, shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
             break
