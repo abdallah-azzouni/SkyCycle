@@ -33,7 +33,12 @@ def add_profile():
 
     print("\nStep 1/4: Profile Name")
     while True:
-        profile_name = input("Enter a name for this profile: ")
+        profile_name = input("Enter a name for this profile [0. Cancel]: ")
+        if profile_name == "0":
+            print("Cancelled.")
+            common.return_to_main_menu()
+            return
+
         if os.path.isdir(f"{common.PROFILES_DIR}/{profile_name}"):
             print(f"profile {profile_name} already exist")
             continue
@@ -46,7 +51,7 @@ def add_profile():
     print("\nStep 2/4: Wallpaper Folder")
     while True:
         wallpapers_path = input(
-            "Enter path to wallpapers folder (e.g. /path/to/wallpapers) [0. Quit]: "
+            "Enter path to wallpapers folder (e.g. /path/to/wallpapers) [0. Cancel]: "
         )
 
         if wallpapers_path == "0":
@@ -75,10 +80,7 @@ def add_profile():
 
     print(f"  Found {count} images (.jpg, .png, ...)")
 
-    choice = input(
-        "Images will be COPIED (originals untouched) and renamed for indexing. Proceed? [Y/n]: "
-    )
-    if choice.lower() == "y" or choice == "":
+    if common.choice(input("Images will be COPIED (originals untouched) and renamed for indexing. Proceed? [Y/n]: ")):
         print("Copying files...")
         copy_files(profile_name, wallpapers_path, profile_folder, images)
 
@@ -128,9 +130,8 @@ def add_profile():
     )
 
     profile_path = f"{common.PROFILES_DIR}/{profile_name}"
-    choice = input("Save this profile? [Y/n]: ")
 
-    if choice.lower() == "y" or choice == "":
+    if common.choice(input("Save this profile? [Y/n]: ")):
         # Add new profile to the profiles dict
         common.add_profile(
             profile_name,

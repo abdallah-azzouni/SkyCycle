@@ -87,6 +87,11 @@ def draw_header(title: str):
     print(f"{margin * ' '}║{left_padding * ' '}{title}{right_padding * ' '}║")
     print(f"{margin * ' '}╚════════════════════════════════════════════════╝")
 
+def choice(x):
+    if x.lower() == "y" or x.lower() == "yes" or x == "" :
+        return True
+    else:
+        return False
 
 #################################################################################
 
@@ -178,6 +183,7 @@ def calculate_sun_times(
     return s
 
 
+# Runner functions ############################################################
 def kill_runner():
     # Kill old process if exists
     if os.path.exists(PID_FILE):
@@ -219,3 +225,4 @@ def restart_runner():
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
         )
+################################################################################

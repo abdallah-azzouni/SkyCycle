@@ -13,9 +13,8 @@ def deactivate_profile():
         return
 
     print(f"Found active profile: {active_profile}")
-    choice = input("Do you want to deactivate this profile? [Y/n]: ")
 
-    if choice.lower() == "y" or choice.lower() == "yes" or choice.lower() == "":
+    if common.choice(input("Do you want to deactivate this profile? [Y/n]: ")):
         common.kill_runner()
         common.update_active_profile(None)
         print("✔ Profile deactivated!")
