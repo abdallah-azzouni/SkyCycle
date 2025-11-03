@@ -2,7 +2,7 @@ import json
 import os
 import platform
 from wcwidth import wcswidth
-from astral import Degrees, LocationInfo
+from astral import LocationInfo
 from astral.sun import sun, midnight
 from datetime import datetime
 import pytz
@@ -20,6 +20,7 @@ if platform.system() == "Windows":
     user_platform = "Windows"
 else:
     import readline  # Enables arrow key navigation in input() on linux
+
     CONFIG_DIR = os.path.expanduser("~/.config/SkyCycle")
 
 CONFIG_FILE = os.path.join(CONFIG_DIR, "data.json")
@@ -34,17 +35,13 @@ else:
     compiled = False
     base_dir = os.path.dirname(os.path.abspath(__file__))  # source
 
-RUNNER_FILE = os.path.join(
-    base_dir, "skycycle-runner.bat" if os.name == "nt" else "skycycle-runner.sh"
-)
+RUNNER_FILE = os.path.join(base_dir, "runner.py")
 
 DEFAULT_COMMANDS = {
     "Windows": 'reg add "HKEY_CURRENT_USER\\Control Panel\\Desktop" /v Wallpaper /t REG_SZ /d "{image}" /f && RUNDLL32.EXE user32.dll,UpdatePerUserSystemParameters',
-
     "Linux (KDE)": '''qdbus6 org.kde.plasmashell /PlasmaShell org.kde.PlasmaShell.evaluateScript "
     var allDesktops = desktops();for (i=0;i<allDesktops.length;i++) {d = allDesktops[i];d.wallpaperPlugin = 'org.kde.image';
     d.currentConfigGroup = Array('Wallpaper','org.kde.image','General');d.writeConfig('Image', 'file://{image}');}"''',
-
     "Linux (GNOME)": 'gsettings set org.gnome.desktop.background picture-uri "file://{image}"',
     "Linux (XFCE)": 'xfconf-query -c xfce4-desktop -p /backdrop/screen0/monitor0/workspace0/last-image -s "{image}"',
     "macOS": 'osascript -e \'tell application "System Events" to tell every desktop to set picture to "{image}"\'',
@@ -66,29 +63,9 @@ def init():
             "location": None,
             "active_profile": None,
             "profiles": {},
-            "cached_sun_times" : None,
+            "cached_sun_times": None,
         }
         write(default_config)
-
-    # Create runner script
-    if not os.path.exists(RUNNER_FILE):
-        content = ""
-        if user_platform == "Windows":
-            if compiled:
-                content = "@echo off\n:loop\ncd %~dp0\nskycycle.exe --update-wallpaper\ntimeout /t 60 >nul\ngoto loop"
-            else:
-                content = "@echo off\n:loop\ncd %~dp0\nuv run main.py --update-wallpaper\ntimeout /t 60 >nul\ngoto loop"
-        else:
-            if compiled:
-                content = '#!/bin/bash\ncd $(dirname "$0")\nwhile true; do\n ./skycycle --update-wallpaper\n  sleep 60\ndone'
-            else:
-                content = '#!/bin/bash\ncd $(dirname "$0")\nwhile true; do\nuv run ./main.py --update-wallpaper\n  sleep 60\ndone'
-
-        with open(RUNNER_FILE, "w") as f:
-            _ = f.write(content)
-
-        if user_platform != "Windows":
-            os.chmod(RUNNER_FILE, 0o755)
 
 
 # user interface functions #####################################################
@@ -172,6 +149,7 @@ def update_platform(platform: str, command: str | None = None):
     config["custom_command"] = command
     write(config)
 
+
 def update_cached_sun_times(sun_times):
     config = read()
     config["cached_sun_times"] = sun_times
@@ -227,18 +205,17 @@ def restart_runner():
     kill_runner()
 
     if platform.system() == "Windows":
-        process = subprocess.Popen(
-            [RUNNER_FILE],
+        p = subprocess.Popen(
+            [sys.executable, RUNNER_FILE],
             creationflags=subprocess.CREATE_NEW_PROCESS_GROUP
             | subprocess.CREATE_NO_WINDOW,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
         )
 
     else:
-        process = subprocess.Popen(
-            [RUNNER_FILE],
-            start_new_session=True,
+        p = subprocess.Popen(
+            [sys.executable, RUNNER_FILE],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
         )
-
-    # Save PID
-    with open(PID_FILE, "w") as f:
-        _ = f.write(str(process.pid))
