@@ -8,10 +8,15 @@ def setup_platform():
     print("\nSelect your platform:")
     for idx, platform in enumerate(platforms, start=1):
         print(f"  {idx}. {platform}")
+    print("  0. Cancel")
 
     while True:
         try:
-            choice = int(input(f"\nEnter your choice [1 - {len(platforms)}]: "))
+            choice = int(input(f"\nEnter your choice [1-{len(platforms)}]: "))
+            if choice == 0:
+                print("Cancelled.")
+                common.return_to_main_menu()
+                return
             if not (1 <= choice <= len(platforms)):
                 raise ValueError
 

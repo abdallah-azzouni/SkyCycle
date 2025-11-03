@@ -34,7 +34,11 @@ def setup_location():
     common.draw_header("Setup Location 📍")
 
     while True:
-        query = input("Enter location: ").strip()
+        query = input("Enter location [0. Cancel]: ").strip()
+        if query == "0":
+            print("Cancelled.")
+            common.return_to_main_menu()
+            return
 
         print(f'\n🔍 Searching for "{query}"...\n')
         results = search_city(query)
