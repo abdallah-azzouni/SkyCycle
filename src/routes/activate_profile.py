@@ -20,6 +20,8 @@ def activate_profile():
 
     if not config.get("profiles"):
         print("⚠️  No profiles available. Please add a profile first.")
+        common.return_to_main_menu()
+        return
 
     print("\nSaved Profiles:")
 
@@ -45,10 +47,12 @@ def activate_profile():
 
     profile_name: str = profiles[choice - 1]
 
-    if profile_name == config["active_profile"]:
+    if profile_name == config["active_profile"] and common.get_runner_pid() != -1:
         print(f'ℹ️  "{profile_name}" is already active.')
         if common.choice(input("\nDo you want to refresh the runner? [Y/n]: ")):
             common.restart_runner()
+        else:
+            print("Cancelled.")
 
         common.return_to_main_menu()
         return

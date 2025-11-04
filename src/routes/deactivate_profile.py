@@ -7,7 +7,7 @@ def deactivate_profile():
 
     active_profile = config.get("active_profile")
 
-    if active_profile is None:
+    if active_profile is None or common.get_runner_pid() == -1:
         print("⚠️ No active profile found!")
         common.return_to_main_menu()
         return
