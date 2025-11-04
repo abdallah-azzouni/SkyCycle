@@ -1,4 +1,5 @@
 from geopy.geocoders import Nominatim
+from geopy.exc import GeocoderUnavailable
 
 import common
 from tzfpy import get_tz
@@ -9,7 +10,7 @@ def search_city(q: str):
         geolocator = Nominatim(user_agent="sky_cycle")
         locations = geolocator.geocode(q, exactly_one=False, limit=5, language="en")
         if not locations:
-            print("No results found.")
+            print("No matching locations found.")
             return []
         print("Found locations:")
         for i, loc in enumerate(locations, 1):
@@ -25,8 +26,11 @@ def search_city(q: str):
             )
         print("  0. Cancel\n")
         return locations
+    except GeocoderUnavailable:
+        print("⚠️ The location service is temporarily offline. Try again later.")
+        return []
     except Exception as e:
-        print(f"⚠️ Could not find any results, try again later. Error: {e}")
+        print(f"⚠️ Unexpected error: {e}")
         return []
 
 
@@ -39,6 +43,9 @@ def setup_location():
             print("Cancelled.")
             common.return_to_main_menu()
             return
+        if query == "":
+            print("Please enter a location.")
+            continue
 
         print(f'\n🔍 Searching for "{query}"...\n')
         results = search_city(query)
