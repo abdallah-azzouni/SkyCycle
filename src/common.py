@@ -8,6 +8,8 @@ from datetime import datetime
 import pytz
 import subprocess
 import sys
+import psutil
+import shutil
 
 # ui options
 margin = 5
@@ -87,11 +89,10 @@ def draw_header(title: str):
     print(f"{margin * ' '}║{left_padding * ' '}{title}{right_padding * ' '}║")
     print(f"{margin * ' '}╚════════════════════════════════════════════════╝")
 
+
 def choice(x):
-    if x.lower() == "y" or x.lower() == "yes" or x == "" :
-        return True
-    else:
-        return False
+    return x.strip().lower() in ("y", "yes", "")
+
 
 #################################################################################
 
@@ -186,43 +187,86 @@ def calculate_sun_times(
 # Runner functions ############################################################
 def kill_runner():
     # Kill old process if exists
-    if os.path.exists(PID_FILE):
-        try:
-            with open(PID_FILE, "r") as f:
-                pid = int(f.read().strip())
+    try:
+        pid = get_runner_pid()
+        if pid == -1:
+            return
 
-            if platform.system() == "Windows":
-                _ = subprocess.run(
-                    ["taskkill", "/PID", str(pid), "/F"],
-                    stdout=subprocess.DEVNULL,
-                    stderr=subprocess.DEVNULL,
-                )
-            else:
-                _ = subprocess.run(
-                    ["kill", str(pid)],
-                    stdout=subprocess.DEVNULL,
-                    stderr=subprocess.DEVNULL,
-                )
-        except:
-            pass
+        if platform.system() == "Windows":
+            _ = subprocess.run(
+                ["taskkill", "/PID", str(pid), "/F"],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+            )
+        else:
+            _ = subprocess.run(
+                ["kill", str(pid)],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+            )
+    except:
+        pass
 
 
 def restart_runner():
     kill_runner()
 
-    if platform.system() == "Windows":
-        p = subprocess.Popen(
-            [sys.executable, RUNNER_FILE],
-            creationflags=subprocess.CREATE_NEW_PROCESS_GROUP
-            | subprocess.CREATE_NO_WINDOW,
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
-        )
+    python_path = shutil.which("python")
+    if python_path is None:
+        python_path = shutil.which("python3")
+    if python_path is None:
+        print("⚠️ Python not found. Please install Python 3.")
+        return
 
+    runner_path = os.path.join(
+        os.path.dirname(sys.executable),
+        "runner.exe" if platform.system() == "Windows" else "runner",
+    )
+
+    if not compiled:
+        if platform.system() == "Windows":
+            p = subprocess.Popen(
+                [python_path, RUNNER_FILE],
+                creationflags=subprocess.CREATE_NEW_PROCESS_GROUP
+                | subprocess.CREATE_NO_WINDOW,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+            )
+
+        else:
+            p = subprocess.Popen(
+                [python_path, RUNNER_FILE],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+            )
     else:
-        p = subprocess.Popen(
-            [sys.executable, RUNNER_FILE],
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
-        )
+        if platform.system() == "Windows":
+            p = subprocess.Popen(
+                [runner_path],
+                creationflags=subprocess.CREATE_NEW_PROCESS_GROUP
+                | subprocess.CREATE_NO_WINDOW,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+            )
+        else:
+            p = subprocess.Popen(
+                [runner_path],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+            )
+
+
+def get_runner_pid():
+    if os.path.exists(PID_FILE):
+        with open(PID_FILE, "r") as f:
+            pid = int(f.read().strip())
+        if not psutil.pid_exists(pid):
+            os.remove(PID_FILE)
+            return -1  # pid is not running
+        else:
+            return pid
+    else:
+        return -1  # pid file does not exist
+
+
 ################################################################################
