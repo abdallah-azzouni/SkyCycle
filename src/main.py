@@ -2,6 +2,8 @@ import common
 import argparse
 import os
 import wallpaper_updater
+import psutil
+import sys
 from routes import (
     setup_location,
     add_profile,
@@ -14,7 +16,7 @@ from routes import (
 
 def exit_program():
     print("\nExiting Sky Cycle. Goodbye! 👋")
-    exit()
+    sys.exit(0)
 
 
 MENU_OPTIONS = {
@@ -68,6 +70,13 @@ def main():
         print(
             f"{common.margin * ' '}Active Profile: {data.get('active_profile', 'None')}"
         )
+
+        if common.get_runner_pid() == -1:
+            runner_status = 'Not running ⚠️'
+        else:
+            runner_status = "Running"
+
+        print(f"{common.margin * ' '}Runner: {runner_status}")
 
         print(
             f"{common.margin * ' '}┌─ Main Menu ────────────────────────────────────┐"
